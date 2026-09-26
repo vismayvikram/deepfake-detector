@@ -1,0 +1,6 @@
+data/
+checkpoints/
+*.pt
+*.zip
+kaggle.json
+.DS_Store
