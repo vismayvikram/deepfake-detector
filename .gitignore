@@ -4,3 +4,4 @@ checkpoints/
 *.zip
 kaggle.json
 .DS_Store
+src/data.py
