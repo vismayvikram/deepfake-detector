@@ -1,0 +1,10 @@
+torch
+torchvision
+torch-dct
+open_clip_torch
+scikit-learn
+matplotlib
+Pillow
+tqdm
+streamlit
+huggingface_hub
