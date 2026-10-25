@@ -20,11 +20,7 @@ st.write(
     "DCT frequency-domain features catches AI-generated faces better than spatial alone."
 )
 
-st.warning(
-    "**Important limitation:** This prototype classifies single static photos. "
-    "It is NOT a video deepfake detector — it cannot evaluate temporal tells like "
-    "blinking irregularities or lip-sync drift, which is a completely different problem."
-)
+
 
 @st.cache_resource
 def load_model():
@@ -110,8 +106,4 @@ if uploaded_file is not None:
     st.pyplot(fig)
     plt.close()
     
-    st.caption(
-        "Top-left corner is DC / low-frequency energy (overall lighting and smooth contours). "
-        "Bottom-right represents high-frequency microtextures. AI generators often leave subtle "
-        "checkerboard or periodic spikes in high-frequency bands."
-    )
+    

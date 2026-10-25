@@ -75,10 +75,10 @@ def main():
             for pert in PERTURBATIONS:
                 tf = get_eval_transform(pert)
                 ds = ds_fn(tf)
-                loader = torch.utils.data.DataLoader(ds, batch_size=32, shuffle=False, num_workers=2)
+                loader = torch.utils.data.DataLoader(ds, batch_size=32, shuffle=False, num_workers=0)
                 
                 auc, acc = evaluate_model_on_loader(model, loader, device)
-                print(f"{model_name:12s} | {set_name:12s} | {pert:10s} | AUC: {auc:.4f} | Acc: {acc:.4f}")
+                print(f"{model_name:12s} | {set_name:12s} | {pert:10s} | AUC: {auc:.4f} | Acc: {acc:.4f}", flush=True)
                 rows.append([model_name, set_name, pert, round(auc, 6), round(acc, 4)])
                 
     if not rows:
@@ -137,25 +137,37 @@ def make_plots(rows):
     plt.close()
     print("saved auc_generator.png")
     
-    # Plot 2: Robustness against perturbations (on StyleGAN)
-    fig, ax = plt.subplots(figsize=(9, 5))
+    # Plot 2: Degradation against perturbations (on StyleGAN)
+    # using different linestyles so overlapping lines near 1.0 are still visible
+    fig, ax = plt.subplots(figsize=(10, 5))
     perts = ["clean", "jpeg90", "jpeg60", "resize0.5", "blur"]
+    # assign distinct style per model so spatial/fusion lines don't hide each other
+    style_map = {
+        "spatial":      {"linestyle": "-",  "marker": "o", "linewidth": 2.0},
+        "spatial_aug":  {"linestyle": "--", "marker": "s", "linewidth": 2.0},
+        "freq":         {"linestyle": "-",  "marker": "^", "linewidth": 1.5},
+        "freq_aug":     {"linestyle": "--", "marker": "v", "linewidth": 1.5},
+        "fusion":       {"linestyle": "-.", "marker": "D", "linewidth": 2.0},
+        "fusion_aug":   {"linestyle": ":",  "marker": "*", "linewidth": 2.0, "markersize": 9},
+        "clip_probe":   {"linestyle": "-",  "marker": "x", "linewidth": 1.5},
+    }
     for m in models_to_plot:
         if m in data and "StyleGAN" in data[m]:
             aucs = [data[m]["StyleGAN"].get(p, (0, 0))[0] for p in perts]
-            ax.plot(perts, aucs, marker="o", label=m)
+            style = style_map.get(m, {"linestyle": "-", "marker": "o"})
+            ax.plot(perts, aucs, label=m, **style)
             
     ax.set_ylabel("StyleGAN Test AUC")
     ax.set_xlabel("Perturbation")
-    ax.set_title("Robustness to Compression & Blur Degradations (StyleGAN)")
+    ax.set_title("Compression & Blur Degradations (StyleGAN)")
     ax.set_ylim(0.4, 1.05)
     ax.axhline(0.5, color="gray", linestyle="--", alpha=0.5)
     ax.legend()
     ax.grid(True, linestyle=":", alpha=0.6)
     plt.tight_layout()
-    plt.savefig("robustness.png", dpi=150)
+    plt.savefig("degradations.png", dpi=150)
     plt.close()
-    print("saved robustness.png")
+    print("saved degradations.png")
 
 if __name__ == "__main__":
     main()
